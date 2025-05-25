@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase User Delete</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    button { padding: 5px 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>User List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody"></tbody>
+  </table>
+
+  <script>
+    const dbURL = "https://user-delete-app-default-rtdb.asia-southeast1.firebasedatabase.app/users";
+
+    function loadUsers() {
+      fetch(dbURL + ".json")
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("userTableBody");
+          tbody.innerHTML = "";
+
+          for (let key in data) {
+            const user = data[key];
+
+            const tr = document.createElement("tr");
+            tr.id = "row-" + key;
+
+            const tdName = document.createElement("td");
+            tdName.textContent = user.name;
+
+            const tdEmail = document.createElement("td");
+            tdEmail.textContent = user.email;
+
+            const tdDelete = document.createElement("td");
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.onclick = function () {
+              deleteUser(key);
+            };
+            tdDelete.appendChild(delBtn);
+
+            tr.appendChild(tdName);
+            tr.appendChild(tdEmail);
+            tr.appendChild(tdDelete);
+            tbody.appendChild(tr);
+          }
+        });
+    }
+
+    function deleteUser(key) {
+      fetch(`${dbURL}/${key}.json`, {
+        method: "DELETE"
+      })
+        .then(res => {
+          if (res.ok) {
+            document.getElementById("row-" + key).remove();
+            console.log("User deleted");
+          } else {
+            console.error("Failed to delete user");
+          }
+        })
+        .catch(err => console.error("Error:", err));
+    }
+
+    loadUsers();
+  </script>
+
+</body>
+</html>
